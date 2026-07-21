@@ -19,9 +19,9 @@ Automatically reserve your preferred desk via the SeatSurfing API, either for a 
 ## 🛠️ Setup
 
 1. Clone this repo or copy the script locally.
-2. Create a config file named `.seatsurfing_config.json` in the same directory.
+2. Create a config file at `~/.config/seatsurfing/config.json`.
 
-### Example `.seatsurfing_config.json`:
+### Example `config.json`:
 
 ```json
 {
@@ -34,6 +34,15 @@ Automatically reserve your preferred desk via the SeatSurfing API, either for a 
 ```
 
 > 🔒 **Keep this file secret!** Do **not** commit it to Git.
+
+### Config file location
+
+The config is looked up in this order (first match wins):
+
+1. `--config <path>`
+2. `$XDG_CONFIG_HOME/seatsurfing/config.json` (if `XDG_CONFIG_HOME` is set).
+3. `~/.config/seatsurfing/config.json` (the default).
+4. `.seatsurfing_config.json` next to the script (legacy fallback).
 
 ## 🧑‍💻 Usage
 

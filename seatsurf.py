@@ -8,14 +8,30 @@ import os
 import sys
 import argparse
 
-CONFIG_PATH = ".seatsurfing_config.json"
+def default_config_path():
+    xdg = os.environ.get("XDG_CONFIG_HOME") or os.path.join(
+        os.path.expanduser("~"), ".config")
+    return os.path.join(xdg, "seatsurfing", "config.json")
 
-def load_config(path=CONFIG_PATH):
-    if not os.path.exists(path):
-        print(f"❌ Config file '{path}' not found.")
-        sys.exit(1)
-    with open(path) as f:
-        return json.load(f)
+def config_candidates(cli_path=None):
+    candidates = [cli_path] if cli_path else []
+    candidates.append(default_config_path())
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    candidates.append(os.path.join(script_dir, ".seatsurfing_config.json"))
+    return candidates
+
+def load_config(cli_path=None):
+    candidates = config_candidates(cli_path)
+    for path in candidates:
+        if path and os.path.exists(path):
+            with open(path) as f:
+                return json.load(f)
+    print("❌ Config file not found. Searched:")
+    for c in candidates:
+        if c:
+            print(f"  - {c}")
+    print("Set one up or pass --config <path>.")
+    sys.exit(1)
 
 def check_api_alive(base_url):
     test_endpoints = ["/auth/ping", "/location", "/swagger", "/"]
@@ -225,6 +241,7 @@ def handle_list_command(config):
 
 def main():
     parser = argparse.ArgumentParser(description="SeatSurfing CLI")
+    parser.add_argument("--config", help="Path to the config file (overrides the default XDG location)")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     book_parser = subparsers.add_parser("book", help="Book a desk")
@@ -236,7 +253,7 @@ def main():
     list_reservations_parser = subparsers.add_parser("list_reservations", help="List your current reservations")
 
     args = parser.parse_args()
-    config = load_config()
+    config = load_config(args.config)
 
     if args.command == "book":
         handle_book_command(args, config)
